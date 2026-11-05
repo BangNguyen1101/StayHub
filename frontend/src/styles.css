@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer base {
+  * {
+    @apply border-slate-200;
+  }
+  body {
+    @apply bg-slate-50 font-sans text-slate-900 antialiased;
+  }
+  button,
+  input {
+    @apply outline-none;
+  }
+}
+@layer components {
+  .field-label {
+    @apply block text-sm font-medium text-slate-700;
+  }
+  .field-input {
+    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm transition placeholder:text-slate-300 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10;
+  }
+  .input-wrap {
+    @apply mt-2 flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 text-slate-400 transition focus-within:border-teal-500 focus-within:ring-4 focus-within:ring-teal-500/10;
+  }
+  .input-wrap input {
+    @apply min-w-0 flex-1 bg-transparent text-sm text-slate-900 placeholder:text-slate-300;
+  }
+  .primary-button {
+    @apply rounded-xl bg-teal-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-600/20 transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+}

@@ -1,0 +1,86 @@
+spring:
+  application:
+    name: quan-ly-nha-tro-backend
+  config:
+    # Local secrets (DB_PASSWORD, JWT_SECRET, ...) live in the git-ignored .env file.
+    import: optional:file:.env[.properties]
+
+  datasource:
+    # Local SQL Server named instance: ADMIN\\BANG.
+    # Keep the password outside source control via DB_PASSWORD.
+    url: jdbc:sqlserver://${DB_HOST:ADMIN};instanceName=${DB_INSTANCE:BANG};databaseName=${DB_NAME:QuanLyNhaTro};encrypt=${DB_ENCRYPT:true};trustServerCertificate=${DB_TRUST_SERVER_CERTIFICATE:true};loginTimeout=${DB_LOGIN_TIMEOUT:30}
+    username: ${DB_USERNAME:sa}
+    # No default: the app must not ship with a real password.
+    password: ${DB_PASSWORD}
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    open-in-view: false
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.SQLServerDialect
+        format_sql: false
+        jdbc:
+          time_zone: UTC
+  servlet:
+    multipart:
+      max-file-size: ${MAINTENANCE_MAX_IMAGE_SIZE:5MB}
+      max-request-size: ${MAINTENANCE_MAX_REQUEST_SIZE:25MB}
+
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-message: never
+    include-stacktrace: never
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:60}
+
+# VietQR.io Quick Link does not require API credentials. It only creates the
+# payment QR; payment confirmation still requires manual confirmation or a
+# separately configured bank-reconciliation webhook.
+# Bank account details come only from environment variables; when they are
+# missing, QR generation is refused instead of using a hardcoded account.
+vietqr:
+  bank-code: ${VIETQR_BANK_CODE:ICB}
+  bank-account: ${VIETQR_BANK_ACCOUNT:}
+  account-name: ${VIETQR_ACCOUNT_NAME:}
+
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+  scheduler:
+    contract-expiry:
+      enabled: ${CONTRACT_EXPIRY_SCHEDULER_ENABLED:false}
+      cron: ${CONTRACT_EXPIRY_SCHEDULER_CRON:0 0 1 * * *}
+      timezone: ${CONTRACT_EXPIRY_SCHEDULER_TIMEZONE:Asia/Ho_Chi_Minh}
+  contracts:
+    # Signed contract PDFs; kept outside the web root and served only after ownership checks.
+    document-dir: ${CONTRACT_DOCUMENT_DIR:./storage/contract-documents}
+  maintenance:
+    # Files are stored outside the public web root and are served only after
+    # the request ownership/role check in MaintenanceController.
+    upload-dir: ${MAINTENANCE_UPLOAD_DIR:./uploads/maintenance}
+    max-image-size-bytes: ${MAINTENANCE_MAX_IMAGE_SIZE_BYTES:5242880}
+  assistant:
+    # Gemini answers free-form questions by calling the assistant's data lookups. Without a key
+    # (or when Gemini fails) the assistant falls back to keyword matching.
+    gemini-api-key: ${GEMINI_API_KEY:}
+    gemini-model: ${GEMINI_MODEL:gemini-3.6-flash}
+    gemini-base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com/v1beta}
+    openai-api-key: ${OPENAI_API_KEY:}
+    openai-model: ${OPENAI_MODEL:gpt-6-luna}
+    openai-base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
+
+logging:
+  level:
+    root: INFO
+    org.hibernate.SQL: WARN
+    org.springframework.security: INFO
